@@ -1,4 +1,4 @@
-import CustomSessionProvider from '@/components/Providers/SessionProvider';
+import CustomSessionProvider from '@/components/Providers/AuthWrapper';
 import Top from './Top';
 
 interface AppLayoutProps {

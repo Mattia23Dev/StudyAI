@@ -20,13 +20,18 @@ export default function Register() {
 
     const onSubmit: SubmitHandler<FormData> = async data => {
         try {
-          await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/register`, {
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/register`, {
             email: data.email,
             password: data.password,
             nomeCompleto: data.nomeCompleto,
             cellulare: data.cellulare
           });
           router.push("/login");
+          const { token, user } = response.data;
+        
+          localStorage.setItem('user', JSON.stringify(user));
+          localStorage.setItem('token', token);
+          document.cookie = `token=${token}; path=/`;
         } catch (error) {
           console.error("Error registering user:", error);
         }

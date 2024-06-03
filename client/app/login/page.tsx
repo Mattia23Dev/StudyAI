@@ -26,6 +26,7 @@ export default function Login() {
         
               localStorage.setItem('user', JSON.stringify(user));
               localStorage.setItem('token', token);
+              document.cookie = `token=${token}; path=/`;
               router.push("/list");
 
           } catch (error) {

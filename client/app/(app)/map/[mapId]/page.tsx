@@ -1,5 +1,6 @@
 "use client";
 import Map from '@/components/Map/Index';
+import AuthWrapper from '@/components/Providers/AuthWrapper';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -7,6 +8,7 @@ export default function MapPage() {
 	const pathname = usePathname() ?? '';
   	const mapId = pathname.split('/').pop();
 	return (
+		<AuthWrapper>
 		<div className='flex'>
 			<div className='hidden md:block flex-1  min-h-[calc(100vh_-_50px)]'>
 				<div className='w-full bg-white h-full'>
@@ -37,5 +39,6 @@ export default function MapPage() {
 				</div>
 			</div>
 		</div>
+		</AuthWrapper>
 	);
 }
