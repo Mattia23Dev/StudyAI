@@ -19,7 +19,7 @@ export default function Providers({ children }: ProvidersProps) {
 				</TooltipProvider>
 			</ConfigurationProvider>
 			<AnalyticsWrapper />
-
+			
 			<Toaster />
 		</>
 	);

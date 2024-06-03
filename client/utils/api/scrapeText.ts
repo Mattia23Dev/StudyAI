@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const host = 'https://api.yourdomain.com';
+const host = `${process.env.BACKEND_URL}/api/extract`;
 
 interface UploadPdfProps {
   file: File;
@@ -19,11 +19,13 @@ export const uploadPdfApi = async ({ file }: UploadPdfProps) => {
   formData.append('file', file);
 
   try {
-    const response = await axios.post(`${host}/upload-pdf`, formData, {
+    const response = await axios.post(`${host}/upload`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
+        //"Access-Control-Allow-Origin": "*",
       },
     });
+    console.log(response)
     return response.data;
   } catch (error) {
     console.error('Error uploading PDF:', error);

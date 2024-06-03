@@ -23,11 +23,14 @@
     "express-session": "^1.18.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.4.0",
+    "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.13",
     "openai": "^4.47.1",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
+    "path": "^0.12.7",
     "pdf-poppler": "^0.2.1",
-    "tesseract.js": "^5.1.0"
+    "tesseract.js": "^5.1.0",
+    "uuid": "^9.0.1"
   }
 }

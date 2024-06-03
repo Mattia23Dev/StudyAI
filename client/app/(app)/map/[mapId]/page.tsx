@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 export default function MapPage() {
-	const pathname = usePathname();
+	const pathname = usePathname() ?? '';
   	const mapId = pathname.split('/').pop();
 	return (
 		<div className='flex'>

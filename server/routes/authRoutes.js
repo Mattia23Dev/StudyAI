@@ -8,13 +8,15 @@ const router = express.Router();
 const jwtSecret = process.env.SECRET; 
 
 router.post('/register', async (req, res) => {
+    console.log(req.body)
     try {
-        const { fullName, email, mobile, password } = req.body;
-        let user = new User({ fullName, email, mobile, password });
+        const { nomeCompleto, email, cellulare, password } = req.body;
+        let user = new User({ nomeCompleto, email, cellulare, password });
         await user.save();
         const token = jwt.sign({ userId: user.id }, jwtSecret, {});
         res.status(201).send('User registered successfully', user, token);
     } catch (error) {
+        console.log(error)
         res.status(400).send(error.message);
     }
 });

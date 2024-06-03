@@ -32,6 +32,7 @@ export type RFState = {
 	nodes: Node[];
 	edges: Edge[];
 	loadFromStorage: () => void;
+	setElements: (nodes: Node[], edges: Edge[]) => void;
 	viewport: Viewport;
 	connectionNodeId: string | null;
 	reactFlowWrapper: RefObject<HTMLDivElement | undefined> | null;
@@ -89,6 +90,10 @@ const useMapStore = create<RFState>((set, get) => ({
 		let selectedPalette = palettes.find((palette) => palette.id === selectedPaletteId)!;
 
 		get().applyPalette(selectedPalette);
+	},
+	setElements: (nodes, edges) => {
+		set({ nodes: [...nodes] });
+		set({ edges: [...edges] });
 	},
 	getNodeContext: (nodeId: string) => {
 		const nodes = findLeafNodes(get().nodes, nodeId).reverse();

@@ -1,3 +1,4 @@
+import CustomSessionProvider from '@/components/Providers/SessionProvider';
 import Top from './Top';
 
 interface AppLayoutProps {
@@ -6,9 +7,11 @@ interface AppLayoutProps {
 
 export default function AppLayout({ children }: AppLayoutProps) {
 	return (
-		<div>
-			<Top />
-			<div>{children}</div>
-		</div>
+		<CustomSessionProvider>
+			<div>
+				<Top />
+				<div>{children}</div>
+			</div>
+		</CustomSessionProvider>
 	);
 }

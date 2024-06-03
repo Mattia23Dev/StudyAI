@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 
 const UserSchema = new mongoose.Schema({
   nomeCompleto: {
@@ -21,6 +22,9 @@ const UserSchema = new mongoose.Schema({
   crediti: {
     type: Number,
     default: 0
+  },
+  payments: {
+    type: Array
   }
 });
 
