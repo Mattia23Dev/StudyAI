@@ -1,6 +1,8 @@
 "use client"
+import axios from 'axios';
 import { signIn } from 'next-auth/react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { FcGoogle } from 'react-icons/fc';
 
@@ -10,19 +12,25 @@ type FormData = {
 };
 
 export default function Login() {
+    const router = useRouter()
     const { register, handleSubmit, formState: { errors } } = useForm<FormData>();
 
     const onSubmit: SubmitHandler<FormData> = async (data) => {
-        console.log(data);
-        const result = await signIn('credentials', {
-            redirect: false,
-            email: data.email,
-            password: data.password,
-        });
+        try {
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/login`, {
+                email: data.email,
+                password: data.password,
+              });
+        
+              const { token, user } = response.data;
+        
+              localStorage.setItem('user', JSON.stringify(user));
+              localStorage.setItem('token', token);
+              router.push("/list");
 
-        if (result?.error) {
-            console.error(result.error);
-        }
+          } catch (error) {
+            console.error("Error registering user:", error);
+          }
     };
 	return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100">

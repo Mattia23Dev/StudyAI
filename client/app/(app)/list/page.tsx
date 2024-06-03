@@ -9,20 +9,21 @@ import { MdAddCircleOutline, MdTextFields, MdPhotoCamera, MdFileUpload } from 'r
 const ListPage: React.FC = () => {
   const { data: session, status } = useSession();
 
+
   if (status === 'loading') {
     return <p>Loading...</p>;
   }
 
-  if (!session) {
+  /*if (!session) {
     return (
       <div className="flex items-center justify-center h-screen">
         <p>You need to be authenticated to view this page.</p>
-        <Link href="/api/auth/signin">
+        <Link href="/login">
           Sign in
         </Link>
       </div>
     );
-  }
+  }*/
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
