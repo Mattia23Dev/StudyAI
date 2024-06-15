@@ -12,7 +12,7 @@ connectDB();
 app.use(bodyparser.json());
 app.use(
   cors({
-    origin: [CLIENT_URL, "http://localhost:3000"],
+    origin: [CLIENT_URL, "http://localhost:3000", "https://app.studdyedu.com", "https://studdyedu.com"],
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   })
