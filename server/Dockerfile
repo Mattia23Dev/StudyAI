@@ -2,7 +2,7 @@
 FROM node:14
 
 # Installa ImageMagick e Poppler-utils
-RUN apt-get update && sudo apt-get install -y imagemagick poppler-utils
+RUN apt-get update && apt-get install -y imagemagick poppler-utils
 # Imposta la directory di lavoro
 WORKDIR /usr/src/app
 
