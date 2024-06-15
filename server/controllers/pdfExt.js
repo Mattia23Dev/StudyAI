@@ -1,5 +1,6 @@
 const fs = require('fs');
-const pdfPoppler = require('pdf-poppler');
+//const pdfPoppler = require('pdf-poppler');
+const { PDFImage } = require('pdf-image');
 const path = require('path');
 const Tesseract = require('tesseract.js');
 require('dotenv').config();
@@ -17,7 +18,7 @@ if (!fs.existsSync(outputDir)){
     fs.mkdirSync(outputDir, { recursive: true });
 }
 
-function convertPDFToImages(pdfPath) {
+/*function convertPDFToImages(pdfPath) {
     return new Promise((resolve, reject) => {
         let opts = {
             format: 'jpeg',
@@ -36,6 +37,28 @@ function convertPDFToImages(pdfPath) {
                 reject(error);  // Rifiuta la promessa con l'errore
             });
     });
+}*/
+async function convertPDFToImages(pdfPath) {
+    const pdfImage = new PDFImage(pdfPath, {
+        outputDirectory: outputDir,
+        convertOptions: {
+            "-resize": "1024x",
+            "-quality": "100"
+        }
+    });
+    
+    try {
+        const numPages = await pdfImage.numberOfPages();
+        const imagePaths = [];
+        for (let i = 0; i < numPages; i++) {
+            const imagePath = await pdfImage.convertPage(i);
+            imagePaths.push(imagePath);
+        }
+        return imagePaths;
+    } catch (error) {
+        console.error('Error converting PDF to images:', error);
+        throw error;
+    }
 }
 
 function splitText(text, numParts) {
@@ -61,54 +84,6 @@ async function performOCR(imagePath) {
     }
 }
 
-/*async function analyzeAndStructureText(text) {
-
-    const response = await openaiClient.chat.completions.create({
-        model: "gpt-4o",
-        messages: [
-            { 
-                role: 'system', 
-                content: `
-                Per favore, schematizza il seguente testo definendo delle gerarchie in formato JSON compatibile con React Flow.
-                Assicurati che la risposta contenga due proprietà principali: "nodes" e "edges".
-                Ogni nodo deve avere un id, data (con etichetta del nodo) e posizione (coordinate x, y).
-                Ogni arco deve avere un id, source, target, type e animated.
-                Per ogni sottogruppo, identifica almeno 3 punti chiave principali, quindi titolo principale, sottogruppi, e ogni sottogruppo un nodo per ogni punto chiave.
-                La risposta JSON deve essere simile a questa, parti direttamente dalla parentesi graffa di apertura del JSON:
-                {
-                  "nodes": [
-                    {"id": "1", "data": {"label": "Titolo Principale"}, "position": {"x": 100, "y": 100}},
-                    {"id": "1a", "data": {"label": "Sottogruppo 1"}, "position": {"x": 200, "y": 200}},
-                    {"id": "1a1", "data": {"label": "Punto Chiave 1"}, "position": {"x": 300, "y": 200}},
-                    {"id": "1a2", "data": {"label": "Punto Chiave 2"}, "position": {"x": 300, "y": 300}},
-                    {"id": "1a3", "data": {"label": "Punto Chiave 3"}, "position": {"x": 300, "y": 400}}
-                  ],
-                  "edges": [
-                    {"id": "e1-1a", "source": "1", "target": "1a", "type": "smoothstep", "animated": true},
-                    {"id": "e1a-1a1", "source": "1a", "target": "1a1", "type": "smoothstep", "animated": true},
-                    {"id": "e1a-1a2", "source": "1a", "target": "1a2", "type": "smoothstep", "animated": true},
-                    {"id": "e1a-1a3", "source": "1a", "target": "1a3", "type": "smoothstep", "animated": true}
-                  ]
-                }
-                Assicurati di terminare la risposta con un JSON completo e corretto.
-            
-                Testo:
-                ${text}
-                `
-            },
-            {
-                role: 'user', 
-                content: `Rispondi con un JSON completo e corretto.`
-            },
-        ],
-        max_tokens: 3250,
-        n: 1,
-        stop: null,
-        temperature: 0.7
-    });
-
-    return response.choices[0].message.content;
-}*/
 function parseJsonResponse(response) {
     const jsonIndicator = '```json';
     if (response.includes(jsonIndicator)) {
@@ -291,12 +266,17 @@ function parseJsonResponse(response) {
 exports.processPDF = async(pdfPath) => {
     console.log('Step 1')
     try {
-        await convertPDFToImages(pdfPath);
+        //await convertPDFToImages(pdfPath);
+        const imagePaths = await convertPDFToImages(pdfPath);
         const files = fs.readdirSync(outputDir);
         let fullText = '';
 
-        for (const file of files) {
+        /*for (const file of files) {
             const imagePath = `${outputDir}/${file}`;
+            const text = await performOCR(imagePath);
+            fullText += text + ' ';  // Accumulate text from all pages
+        }*/
+        for (const imagePath of imagePaths) {
             const text = await performOCR(imagePath);
             fullText += text + ' ';  // Accumulate text from all pages
         }
@@ -308,3 +288,54 @@ exports.processPDF = async(pdfPath) => {
         console.error('Error processing PDF:', error);
     }
 }
+
+
+
+/*async function analyzeAndStructureText(text) {
+
+    const response = await openaiClient.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+            { 
+                role: 'system', 
+                content: `
+                Per favore, schematizza il seguente testo definendo delle gerarchie in formato JSON compatibile con React Flow.
+                Assicurati che la risposta contenga due proprietà principali: "nodes" e "edges".
+                Ogni nodo deve avere un id, data (con etichetta del nodo) e posizione (coordinate x, y).
+                Ogni arco deve avere un id, source, target, type e animated.
+                Per ogni sottogruppo, identifica almeno 3 punti chiave principali, quindi titolo principale, sottogruppi, e ogni sottogruppo un nodo per ogni punto chiave.
+                La risposta JSON deve essere simile a questa, parti direttamente dalla parentesi graffa di apertura del JSON:
+                {
+                  "nodes": [
+                    {"id": "1", "data": {"label": "Titolo Principale"}, "position": {"x": 100, "y": 100}},
+                    {"id": "1a", "data": {"label": "Sottogruppo 1"}, "position": {"x": 200, "y": 200}},
+                    {"id": "1a1", "data": {"label": "Punto Chiave 1"}, "position": {"x": 300, "y": 200}},
+                    {"id": "1a2", "data": {"label": "Punto Chiave 2"}, "position": {"x": 300, "y": 300}},
+                    {"id": "1a3", "data": {"label": "Punto Chiave 3"}, "position": {"x": 300, "y": 400}}
+                  ],
+                  "edges": [
+                    {"id": "e1-1a", "source": "1", "target": "1a", "type": "smoothstep", "animated": true},
+                    {"id": "e1a-1a1", "source": "1a", "target": "1a1", "type": "smoothstep", "animated": true},
+                    {"id": "e1a-1a2", "source": "1a", "target": "1a2", "type": "smoothstep", "animated": true},
+                    {"id": "e1a-1a3", "source": "1a", "target": "1a3", "type": "smoothstep", "animated": true}
+                  ]
+                }
+                Assicurati di terminare la risposta con un JSON completo e corretto.
+            
+                Testo:
+                ${text}
+                `
+            },
+            {
+                role: 'user', 
+                content: `Rispondi con un JSON completo e corretto.`
+            },
+        ],
+        max_tokens: 3250,
+        n: 1,
+        stop: null,
+        temperature: 0.7
+    });
+
+    return response.choices[0].message.content;
+}*/

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const host = `${process.env.BACKEND_URL}/api/extract`;
+const host = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/extract`;
 
 interface UploadPdfProps {
   file: File;
