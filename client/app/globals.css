@@ -28,6 +28,10 @@
 	--card-border-rgb: 131, 134, 135;
 }
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 @media (prefers-color-scheme: dark) {
 	:root {
 		--foreground-rgb: 255, 255, 255;
@@ -69,6 +73,55 @@ a {
 	color: inherit;
 	text-decoration: none;
 }
+
+@keyframes spin {
+	0% {
+	  transform: rotate(0deg);
+	}
+	100% {
+	  transform: rotate(360deg);
+	}
+  }
+  
+  .main {
+	padding: 5rem 0;
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+  }
+  
+  .loader {
+	border: 8px solid #f3f3f3;
+	border-top: 8px solid #ff4444;
+	border-radius: 50%;
+	width: 64px;
+	height: 64px;
+	animation: spin 1s linear infinite;
+	display: flex;
+	margin: 1rem auto 0 auto;
+  }
+
+  .none {
+	display: none !important;
+  }
+  
+  .download {
+	padding: 1rem 2rem;
+	background: #f44;
+	border-radius: 0.5rem;
+	color: #fafafa;
+	cursor: pointer;
+	width: 100%;
+	display: flex;
+	text-align: center;
+	justify-content: center;
+  }
+  
+  .download:hover {
+	background: #f34;
+  }
 
 @media (prefers-color-scheme: dark) {
 	html {
