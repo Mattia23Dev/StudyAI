@@ -2,7 +2,9 @@ import React from 'react'
 import { useCallback, useState } from 'react';
 import { MdAddCircleOutline, MdFileUpload } from 'react-icons/md';
 import { Document, Page, pdfjs } from 'react-pdf';
+import Tesseract from 'tesseract.js';
 import '../../../app/page.module.css'
+import { sendTextToApi } from '@/utils/api/scrapeText';
 
 interface FilePopupProps {
   isOpen: boolean;
@@ -23,6 +25,8 @@ const ImagePopup: React.FC<ImagePopupProps> = ({ isOpen, images, onClose }) => {
   const [chapters, setChapters] = useState<ChapterImages>({ 'Capitolo 1': [] });
   const [activeChapter, setActiveChapter] = useState<string>('Capitolo 1');
   const [selectedImages, setSelectedImages] = useState<{ [key: string]: Set<string> }>({ 'Capitolo 1': new Set() });
+  const [ocrResults, setOcrResults] = useState<{ [key: string]: string }>({});
+  const [analysisResults, setAnalysisResults] = useState<any>({});
 
   const addChapter = () => {
     const newChapterNumber = Object.keys(chapters).length + 1;
@@ -35,7 +39,7 @@ const ImagePopup: React.FC<ImagePopupProps> = ({ isOpen, images, onClose }) => {
   const handleImageClick = useCallback((image: string) => {
     setSelectedImages(prevSelectedImages => {
       const newSelectedImages = { ...prevSelectedImages };
-      const chapterImages = newSelectedImages[activeChapter] || new Set();
+      const chapterImages = new Set(newSelectedImages[activeChapter]);
 
       if (chapterImages.has(image)) {
         chapterImages.delete(image);
@@ -45,7 +49,6 @@ const ImagePopup: React.FC<ImagePopupProps> = ({ isOpen, images, onClose }) => {
 
       newSelectedImages[activeChapter] = chapterImages;
 
-      // Update the chapters state
       setChapters(prevChapters => ({
         ...prevChapters,
         [activeChapter]: Array.from(chapterImages)
@@ -55,8 +58,35 @@ const ImagePopup: React.FC<ImagePopupProps> = ({ isOpen, images, onClose }) => {
     });
   }, [activeChapter]);
   
-  console.log(chapters)
-  console.log(selectedImages)
+  const convertAndAnalyzeText = async () => {
+    try {
+      const results: { [key: string]: string } = {};
+
+      for (const [chapter, imagesSet] of Object.entries(selectedImages)) {
+        const imagesArray = Array.from(imagesSet);
+        let chapterText = '';
+
+        for (const image of imagesArray) {
+          const { data: { text } } = await Tesseract.recognize(image, 'eng');
+          chapterText += text + '\n';
+        }
+
+        results[chapter] = chapterText;
+      }
+
+      setOcrResults(results);
+      console.log('OCR Results:', results);
+
+      // Step 2: Analyze Text
+      const response = await sendTextToApi({ chapterTexts: results });
+      console.log('Analysis Results:', response);
+      setAnalysisResults(response.analyses);
+      console.log(response.analyses)
+    } catch (error) {
+      console.error('Error during conversion and analysis:', error);
+    }
+  };
+
   return (
     <div className={`fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 ${isOpen ? '' : 'hidden'}`}>
       <div className="bg-white rounded-lg p-6 w-full max-w-5xl h-4/5 mx-auto overflow-x-auto">
@@ -86,7 +116,13 @@ const ImagePopup: React.FC<ImagePopupProps> = ({ isOpen, images, onClose }) => {
             </div>
           ))}
         </div>
-        <div className="mt-4 flex justify-end">
+        <div className="mt-4 flex justify-end space-x-4">
+          <button
+            onClick={convertAndAnalyzeText}
+            className="bg-green-500 text-white rounded-lg px-4 py-2 flex items-center"
+          >
+            Converti in Testo
+          </button>
           <button
             onClick={onClose}
             className="bg-orange-500 text-white rounded-lg px-4 py-2 flex items-center"

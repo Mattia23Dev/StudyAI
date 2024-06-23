@@ -14,6 +14,14 @@ interface TextRequestProps {
   text: string;
 }
 
+interface ChapterTexts {
+  [chapter: string]: string;
+}
+
+interface TextRequestProps {
+  chapterTexts: { [key: string]: string };
+}
+
 export const uploadPdfApi = async ({ file }: UploadPdfProps) => {
   const formData = new FormData();
   formData.append('file', file);
@@ -52,12 +60,12 @@ export const uploadImages = async ({ images }: UploadImagesProps) => {
   }
 };
 
-export const sendTextToApi = async ({ text }: TextRequestProps) => {
+export const sendTextToApi = async ({ chapterTexts }: TextRequestProps) => {
   try {
-    const response = await axios.post(`${host}/api1`, { text });
+    const response = await axios.post(`${host}/analyze-text`, { chapterTexts });
     return response.data;
   } catch (error) {
-    console.error('Error sending text to API 1:', error);
+    console.error('Error sending text to API:', error);
     throw error;
   }
 };

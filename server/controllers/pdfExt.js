@@ -1,6 +1,5 @@
 const fs = require('fs');
 //const pdfPoppler = require('pdf-poppler');
-const { PDFImage } = require('pdf-image');
 const path = require('path');
 const Tesseract = require('tesseract.js');
 require('dotenv').config();
@@ -11,64 +10,6 @@ const openaiClient = new openai.OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
     dangerouslyAllowBrowser: true,
   });
-const pdfPath = './documento.pdf';
-const outputDir = './images'; 
-
-if (!fs.existsSync(outputDir)){
-    fs.mkdirSync(outputDir, { recursive: true });
-}
-
-/*function convertPDFToImages(pdfPath) {
-    return new Promise((resolve, reject) => {
-        let opts = {
-            format: 'jpeg',
-            out_dir: outputDir, // Assicurati che questa cartella esista
-            out_prefix: 'page',
-            page: null // Converte tutte le pagine
-        };
-
-        pdfPoppler.convert(pdfPath, opts)
-            .then(res => {
-                console.log('Pages converted to images:', res);
-                resolve(res);  // Risolve la promessa con il risultato della conversione
-            })
-            .catch(error => {
-                console.error('Error converting PDF to images:', error);
-                reject(error);  // Rifiuta la promessa con l'errore
-            });
-    });
-}*/
-async function convertPDFToImages(pdfPath) {
-    const pdfImage = new PDFImage(pdfPath, {
-        outputDirectory: outputDir,
-        convertOptions: {
-            "-resize": "1024x",
-            "-quality": "100"
-        }
-    });
-    
-    try {
-        const numPages = await pdfImage.numberOfPages();
-        const imagePaths = [];
-        for (let i = 0; i < numPages; i++) {
-            const imagePath = await pdfImage.convertPage(i);
-            imagePaths.push(imagePath);
-        }
-        return imagePaths;
-    } catch (error) {
-        console.error('Error converting PDF to images:', error);
-        throw error;
-    }
-}
-
-function splitText(text, numParts) {
-    const partLength = Math.ceil(text.length / numParts);
-    const parts = [];
-    for (let i = 0; i < numParts; i++) {
-      parts.push(text.slice(i * partLength, (i + 1) * partLength));
-    }
-    return parts;
-}
 
 async function performOCR(imagePath) {
     try {
@@ -208,7 +149,7 @@ function parseJsonResponse(response) {
     return { nodes, edges };
   }
 
-  async function analyzeAndStructureText(text) {
+exports.analyzeAndStructureText = async (text) => {
     const response = await openaiClient.chat.completions.create({
       model: "gpt-4o",
       messages: [
@@ -247,7 +188,7 @@ function parseJsonResponse(response) {
         },
         {
           role: 'user',
-          content: `Rispondi con un JSON completo e corretto.`
+          content: `Rispondi con un JSON COMPLETO, CORRETTO E BEN FORMATTATO.`
         },
       ],
       max_tokens: 1600,
@@ -262,34 +203,6 @@ function parseJsonResponse(response) {
     console.log(convertedResponse)
     return convertedResponse;
   }
-
-exports.processPDF = async(pdfPath) => {
-    console.log('Step 1')
-    try {
-        //await convertPDFToImages(pdfPath);
-        const imagePaths = await convertPDFToImages(pdfPath);
-        const files = fs.readdirSync(outputDir);
-        let fullText = '';
-
-        /*for (const file of files) {
-            const imagePath = `${outputDir}/${file}`;
-            const text = await performOCR(imagePath);
-            fullText += text + ' ';  // Accumulate text from all pages
-        }*/
-        for (const imagePath of imagePaths) {
-            const text = await performOCR(imagePath);
-            fullText += text + ' ';  // Accumulate text from all pages
-        }
-        console.log(fullText)
-        const structuredText = await analyzeAndStructureText(fullText);
-        console.log("Structured Text from the entire document:", structuredText);
-        return structuredText
-    } catch (error) {
-        console.error('Error processing PDF:', error);
-    }
-}
-
-
 
 /*async function analyzeAndStructureText(text) {
 
