@@ -10,16 +10,11 @@ interface UploadImagesProps {
   images: File[];
 }
 
-interface TextRequestProps {
-  text: string;
-}
-
 interface ChapterTexts {
   [chapter: string]: string;
 }
-
 interface TextRequestProps {
-  chapterTexts: { [key: string]: string };
+  chapterTexts: ChapterTexts;
 }
 
 export const uploadPdfApi = async ({ file }: UploadPdfProps) => {
