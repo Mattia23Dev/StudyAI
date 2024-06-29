@@ -1,7 +1,20 @@
 import axios from 'axios';
 
 const host = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/extract`;
-
+interface User {
+  current: {
+    _id: string;
+  };
+}
+const user = localStorage.getItem("auth");
+let parsedUser: User | null = null;
+if (user) {
+  try {
+    parsedUser = JSON.parse(user);
+  } catch (e) {
+    console.error('Error parsing user from localStorage:', e);
+  }
+}
 interface UploadPdfProps {
   file: File;
 }
@@ -57,7 +70,7 @@ export const uploadImages = async ({ images }: UploadImagesProps) => {
 
 export const sendTextToApi = async ({ chapterTexts }: TextRequestProps) => {
   try {
-    const response = await axios.post(`${host}/analyze-text`, { chapterTexts });
+    const response = await axios.post(`${host}/analyze-text`, { chapterTexts, userId: parsedUser?.current._id });
     return response.data;
   } catch (error) {
     console.error('Error sending text to API:', error);

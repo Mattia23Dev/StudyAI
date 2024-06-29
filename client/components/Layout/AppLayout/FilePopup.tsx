@@ -5,6 +5,8 @@ import { Document, Page, pdfjs } from 'react-pdf';
 import Tesseract from 'tesseract.js';
 import '../../../app/page.module.css'
 import { sendTextToApi } from '@/utils/api/scrapeText';
+import useMapStore, { handleApiResponse } from '@/stores/mapStore';
+import { useRouter } from 'next/navigation';
 
 interface FilePopupProps {
   isOpen: boolean;
@@ -22,11 +24,15 @@ interface ChapterImages {
 }
 
 const ImagePopup: React.FC<ImagePopupProps> = ({ isOpen, images, onClose }) => {
+  const router = useRouter();
+	const setElements = useMapStore((state) => state.setElements);
+  const handleApiResponse = useMapStore((state) => state.setApiResponse);
   const [chapters, setChapters] = useState<ChapterImages>({ 'Capitolo 1': [] });
   const [activeChapter, setActiveChapter] = useState<string>('Capitolo 1');
   const [selectedImages, setSelectedImages] = useState<{ [key: string]: Set<string> }>({ 'Capitolo 1': new Set() });
   const [ocrResults, setOcrResults] = useState<{ [key: string]: string }>({});
   const [analysisResults, setAnalysisResults] = useState<any>({});
+  const [isLoading, setIsLoading] = useState(false)
 
   const addChapter = () => {
     const newChapterNumber = Object.keys(chapters).length + 1;
@@ -59,6 +65,7 @@ const ImagePopup: React.FC<ImagePopupProps> = ({ isOpen, images, onClose }) => {
   }, [activeChapter]);
   
   const convertAndAnalyzeText = async () => {
+    setIsLoading(true)
     try {
       const results: { [key: string]: string } = {};
 
@@ -82,14 +89,20 @@ const ImagePopup: React.FC<ImagePopupProps> = ({ isOpen, images, onClose }) => {
       console.log('Analysis Results:', response);
       setAnalysisResults(response.analyses);
       console.log(response.analyses)
+      setElements(response.analyses[0].structuredText.nodes, response.analyses[0].structuredText.edges);
+			const randomId = Math.random().toString(36).substring(2, 15);
+      router.push(`/map/${randomId}`);
+      handleApiResponse(response.analyses)
+      setIsLoading(false)
     } catch (error) {
       console.error('Error during conversion and analysis:', error);
+      setIsLoading(false)
     }
   };
 
   return (
     <div className={`fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 ${isOpen ? '' : 'hidden'}`}>
-      <div className="bg-white rounded-lg p-6 w-full max-w-5xl h-4/5 mx-auto overflow-x-auto">
+      {!isLoading ? <div className="bg-white rounded-lg p-6 w-full max-w-5xl h-4/5 mx-auto overflow-x-auto h-[95vh]">
         <h2 className="text-2xl font-bold mb-4">Immagini estratte</h2>
         <div className="flex items-center mb-4">
           {Object.keys(chapters).map((chapter, index) => (
@@ -130,7 +143,8 @@ const ImagePopup: React.FC<ImagePopupProps> = ({ isOpen, images, onClose }) => {
             Chiudi
           </button>
         </div>
-      </div>
+      </div> : 
+      <div>LOADING...</div>}
     </div>
   );
 };
@@ -227,6 +241,7 @@ const FilePopup: React.FC<FilePopupProps> = ({ onClose, isOpen }) => {
 
   return (
     <div className={`fixed inset-0 z-50 flex w-100 items-center justify-center bg-black bg-opacity-50 ${isOpen ? '' : 'hidden'}`}>
+      {!isLoading ?
       <div className="bg-white rounded-lg p-6 w-full max-w-3xl mx-auto">
         <h2 className="text-2xl font-bold mb-4">Card da Pdf</h2>
         <div className="relative">
@@ -294,6 +309,7 @@ const FilePopup: React.FC<FilePopupProps> = ({ onClose, isOpen }) => {
 
         <ImagePopup isOpen={isImagePopupOpen} images={imageUrlArray} onClose={() => setIsImagePopupOpen(false)} />
       </div>
+      : <div>LOADING..</div>}
     </div>
   );
 };

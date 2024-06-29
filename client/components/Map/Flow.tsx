@@ -48,8 +48,6 @@ function Flow() {
 		setReactFlowWrapper(reactFlowWrapper);
 	}, [setReactFlowWrapper]);
 
-	console.log(edges)
-	console.log(nodes)
 	return (
 		<>
 			<div className='w-full h-full bg-slate-100' ref={reactFlowWrapper}>

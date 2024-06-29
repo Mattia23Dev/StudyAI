@@ -6,6 +6,7 @@ import Tesseract from 'tesseract.js';
 import { MdAddCircleOutline, MdTextFields, MdPhotoCamera, MdFileUpload } from 'react-icons/md';
 import AuthWrapper from '@/components/Providers/AuthWrapper';
 import TextCardPopup from '@/components/Layout/AppLayout/TextCardPopup';
+import '@/styles/list.css'
 import QrCodePopup from '@/components/Layout/AppLayout/QrCodePopup';
 import axios from 'axios';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
@@ -13,27 +14,49 @@ import * as ScrollAreaPrimitive from '@radix-ui/react-scroll-area';
 import { Cross2Icon, EyeOpenIcon, DownloadIcon } from '@radix-ui/react-icons';
 import { Document, Page, pdfjs } from 'react-pdf';
 import FilePopup from "@/components/Layout/AppLayout/FilePopup";
+import { fetchUserMaps } from "@/utils/api/appApi";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
-
+interface User {
+  current: {
+    _id: string;
+  };
+}
+interface Map {
+  name: string;
+  chapters: any[];
+}
 
   const ListPage: React.FC = () => {
     const [isPopupOpenText, setIsPopupOpenText] = useState(false);
     const [isPopupOpenQr, setIsPopupOpenQr] = useState(false);
     const [isPopupOpenPdf, setIsPopupOpenPdf] = useState(false);
-    const [file, setFile] = useState<File | null>(null);
-    const [images, setImages] = useState<string[]>([]);
     const [activeMap, setActiveMap] = useState(true);
     const [activeFolder, setActiveFolder] = useState(false);
-    const [selectedChapter, setSelectedChapter] = useState<string[]>([]);
-    const [chapters, setChapters] = useState<{ [key: string]: string[] }>({});
-    const [extractedTexts, setExtractedTexts] = useState<{ [key: string]: string }>({});
     const [isLoading, setIsLoading] = useState(false);
-    const [numPages, setNumPages] = useState<number | null>(null);
-    const [imageUrlArray, setImageUrlArray] = useState<string[] | null>(null);
-    const [fileType, setFileType] = useState<string | null>(null);
-    const [selectedPDFFile, setSelectedPDFFile] = useState<File | null>(null);
-  
+    const [maps, setMaps] = useState([])
+    const user = localStorage.getItem("auth");
+    let parsedUser: User | null = null;
+    if (user) {
+      try {
+        parsedUser = JSON.parse(user);
+      } catch (e) {
+        console.error('Error parsing user from localStorage:', e);
+      }
+    }
+    
+    const getMaps = async () => {
+      try {
+        const maps = await fetchUserMaps()
+        setMaps(maps)
+      } catch (error) {
+        console.error(error)
+      }
+    }
+
+    useEffect(() => {
+      getMaps()
+    }, [])
     const handleOpenPopup = (open: string) => {
       if (open === "zero") {
         console.log(open);
@@ -53,54 +76,6 @@ pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/$
       setIsPopupOpenQr(false);
       setIsPopupOpenPdf(false);
     };
-  
-    const handleImage = useCallback(
-      (event: React.ChangeEvent<HTMLInputElement>) => {
-        setImageUrlArray([]);
-        const file = event.target.files?.[0];
-  
-        if (file && file.type === 'application/pdf') {
-          setIsLoading(true);
-          setSelectedPDFFile(file);
-        } else if (file) {
-          setFileType('image');
-          setImageUrlArray([URL.createObjectURL(file)]);
-        }
-      },
-      []
-    );
-  
-    const onLoadSuccess = useCallback(
-      ({ numPages }: { numPages: number }) => {
-        setNumPages(numPages);
-        setIsLoading(false);
-      },
-      []
-    );
-  
-    const onRenderSuccess = useCallback(
-      (pageIndex: number) => {
-        if (numPages) {
-          Array.from(new Array(numPages), (el, index) => {
-            const importPDFCanvas = document.querySelector<HTMLCanvasElement>(
-              `.import-pdf-page-${index + 1} canvas`
-            );
-  
-            if (pageIndex === index && importPDFCanvas) {
-              importPDFCanvas.toBlob((blob) => {
-                if (blob) {
-                  setImageUrlArray((prev) => [
-                    ...(prev || []),
-                    URL.createObjectURL(blob),
-                  ]);
-                }
-              });
-            }
-          });
-        }
-      },
-      [numPages]
-    );
   
     const uploadImagesToWordPress = async (images: string[]) => {
       const uploadedImages: string[] = [];
@@ -162,54 +137,20 @@ pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/$
               <Tab onClick={() => { setActiveMap(false); setActiveFolder(true); }} text="Cartelle" active={activeFolder} />
             </nav>
           </div>
+          {activeMap ? 
+          <div className="text-center text-gray-600 flex gap-3">
+            {maps && maps.length > 0 ? maps.map((map, index) => (
+              <MapComponent key={index} map={map} />
+            )) : "Qui troverai tutte le mappe che hai creato. Crea una mappa per iniziare!"}
+          </div> : 
           <div className="text-center text-gray-600">
-            Qui troverai tutte le mappe che hai creato. Crea una mappa per iniziare!
-          </div>
+            Qui troverai tutte le cartelle!
+          </div>}
         </div>
         <TextCardPopup isOpen={isPopupOpenText} onClose={handleClosePopup} />
         <QrCodePopup isOpen={isPopupOpenQr} onClose={handleClosePopup} />
         <FilePopup isOpen={isPopupOpenPdf} onClose={handleClosePopup} />
         {isLoading && <div />}
-  
-        {selectedPDFFile && (
-          <div>
-            <Document
-              file={selectedPDFFile}
-              onLoadSuccess={onLoadSuccess}
-              error={<div>An error occurred!</div>}
-            >
-              {Array.from(new Array(numPages), (el, index) => (
-                <React.Fragment key={`page_${index + 1}`}>
-                  <Page
-                    pageNumber={index + 1}
-                    className={`import-pdf-page-${index + 1} ${fileType === 'image'}`}
-                    onRenderSuccess={() => onRenderSuccess(index)}
-                    width={1024}
-                    renderTextLayer={false}
-                    renderAnnotationLayer={false}
-                    error={<div>An error occurred!</div>}
-                  />
-                  {imageUrlArray && imageUrlArray[index] && (
-                    <a href={imageUrlArray[index]} download>
-                      download file
-                    </a>
-                  )}
-                </React.Fragment>
-              ))}
-            </Document>
-          </div>
-        )}
-  
-        {!!imageUrlArray?.length &&
-          fileType === 'image' &&
-          imageUrlArray.map((image: string, index: number) => (
-            <div key={`page_${index + 1}`}>
-              <img src={image} />
-              <a href={image} download>
-                download file
-              </a>
-            </div>
-          ))}
       </AuthWrapper>
     );
   };
@@ -255,5 +196,18 @@ const Tab: React.FC<{ text: string; active?: boolean; onClick: () => void }> = (
   );
 };
 
+const MapComponent: React.FC<{ map: Map }> = ({ map }) => {
+  return (
+    <div className="map-card">
+      <div className="map-card-header">
+        <div className="map-card-menu">...</div>
+      </div>
+      <div className="map-card-body">
+        <div className="map-icon">🌐</div>
+        <div className="map-name">{map.name}</div>
+      </div>
+    </div>
+  );
+};
 
 export default ListPage;

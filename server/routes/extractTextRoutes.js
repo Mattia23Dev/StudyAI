@@ -4,6 +4,7 @@ const { processPDF, analyzeAndStructureText } = require('../controllers/pdfExt')
 const multer = require("multer");
 const path = require("path");
 const Map = require('../models/Map');
+const { getMapsByUserId } = require('../controllers/appController');
 require('dotenv').config();
 const router = express.Router();
 
@@ -55,7 +56,7 @@ async function saveMap(userId, analyses) {
   
 router.post('/analyze-text', async (req, res) => {
     const { chapterTexts, userId } = req.body;
-    console.log(chapterTexts)
+    console.log(userId)
     try {
       const analyses = await Promise.all(
         Object.entries(chapterTexts).map(async ([chapter, text]) => {
@@ -72,5 +73,8 @@ router.post('/analyze-text', async (req, res) => {
       res.status(500).send('Error processing request');
     }
   });
+
+router.get('/:id/maps', getMapsByUserId);
+
 
 module.exports = router;

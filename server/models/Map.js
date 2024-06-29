@@ -13,6 +13,7 @@ const chapterSchema = new mongoose.Schema({
       ref: 'User',
       required: true,
     },
+    name: String,
     shared: {
       type: [String],
     },

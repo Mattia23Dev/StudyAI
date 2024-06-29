@@ -47,6 +47,8 @@ export type RFState = {
 	getNodeContext: (nodeId: string) => { main: string; context: Array<string> };
 	removeElement: (nodeId: string) => void;
 	applyPalette: (palette: PaletteElement) => void;
+	chapters: { chapter: string; structuredText: { nodes: any[], edges: any[] } }[];
+	setApiResponse: (response: { chapter: string; structuredText: { nodes: any[], edges: any[] } }[]) => void;
 };
 
 // const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
@@ -55,6 +57,7 @@ export type RFState = {
 // );
 
 const useMapStore = create<RFState>((set, get) => ({
+	chapters: [],
 	instance: null,
 	onInit: (instance: ReactFlowInstance) => {
 		set({
@@ -311,6 +314,17 @@ const useMapStore = create<RFState>((set, get) => ({
 
 		set({ nodes: newNodes, edges: newEdges });
 	},
+	setApiResponse: (response: { chapter: string; structuredText: { nodes: any[], edges: any[] } }[]) => {
+		// Salva tutta la risposta nell'array 'chapters'
+		set({
+		  chapters: response
+		});
+	  },
 }));
+
+export const handleApiResponse = async (apiResponse: any) => {
+	const mapStore = useMapStore.getState();
+	mapStore.setApiResponse(apiResponse);
+};
 
 export default useMapStore;

@@ -191,14 +191,17 @@ exports.analyzeAndStructureText = async (text) => {
           content: `Rispondi con un JSON COMPLETO, CORRETTO E BEN FORMATTATO.`
         },
       ],
-      max_tokens: 1600,
+      max_tokens: 4000,
       n: 1,
       stop: null,
       temperature: 0.7
     });
   
-    const parsedResponse = JSON.parse(response.choices[0].message.content);
+    const cleanedContent = response.choices[0].message.content.replace(/```json/g, '').replace(/```/g, '').trim();
+
     console.log(response.choices[0].message.content);
+    const parsedResponse = JSON.parse(cleanedContent);
+
     const convertedResponse = convertJsonToFlowElements(parsedResponse);
     console.log(convertedResponse)
     return convertedResponse;
