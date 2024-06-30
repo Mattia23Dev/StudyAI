@@ -58,6 +58,7 @@
 		"@types/react-dom": "18.0.10",
 		"@types/react-pdf": "^5.0.2",
 		"autoprefixer": "10.4.13",
+		"encoding": "^0.1.13",
 		"eslint": "8.33.0",
 		"eslint-config-next": "13.1.6",
 		"graphology-types": "0.24.7",
