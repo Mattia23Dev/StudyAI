@@ -6,7 +6,7 @@ interface User {
     _id: string;
   };
 }
-let user = localStorage.getItem("auth");
+let user = localStorage.getItem("user");
 
 let parsedUser: User | null = null;
 if (user) {

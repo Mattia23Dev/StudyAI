@@ -8,7 +8,7 @@ interface User {
 }
 let user;
 if (typeof window !== 'undefined') {
-  user = localStorage.getItem("auth");
+  user = localStorage.getItem("user");
 }
 let parsedUser: User | null = null;
 if (user) {

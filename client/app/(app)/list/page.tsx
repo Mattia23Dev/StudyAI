@@ -49,7 +49,7 @@ interface Map {
     useEffect(() => {
       let user;
       if (typeof window !== 'undefined') {
-        user = localStorage.getItem("auth");
+        user = localStorage.getItem("user");
       }
       if (user) {
         try {
