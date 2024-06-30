@@ -36,8 +36,8 @@ import useMapStore from '@/stores/mapStore';
 				</div>
 				<div className='flex items-center gap-3'>
 				{showChapters && (
-					chapters?.map((chapter) => (
-						<div onClick={() => setChapt(chapter)}>
+					chapters?.length > 0 && chapters?.map((chapter, index) => (
+						<div key={index} onClick={() => setChapt(chapter)}>
 						 <button>{chapter.chapter}</button>
 						</div>						
 					))
