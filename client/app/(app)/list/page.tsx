@@ -44,13 +44,13 @@ interface Map {
         console.error(error)
       }
     }
+    let parsedUser: User | null = null;
 
     useEffect(() => {
       let user;
       if (typeof window !== 'undefined') {
         user = localStorage.getItem("auth");
       }
-      let parsedUser: User | null = null;
       if (user) {
         try {
           parsedUser = JSON.parse(user);
