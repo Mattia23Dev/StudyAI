@@ -15,7 +15,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
 
 	useEffect(() => {
 		if (typeof window !== 'undefined') {
-		  setShowChapters(pathname.startsWith('/map/'));
+		  setShowChapters((pathname ?? '').startsWith('/map/'));
 		}
 	  }, [pathname]);
 	return (
