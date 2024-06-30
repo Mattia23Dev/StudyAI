@@ -59,7 +59,7 @@ interface Map {
 
     useEffect(() => {
       getMaps()
-    }, [])
+    }, [parsedUser])
     const handleOpenPopup = (open: string) => {
       if (open === "zero") {
         console.log(open);
