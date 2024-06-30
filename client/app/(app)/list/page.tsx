@@ -35,7 +35,10 @@ interface Map {
     const [activeFolder, setActiveFolder] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [maps, setMaps] = useState([])
-    const user = localStorage.getItem("auth");
+    let user;
+    if (typeof window !== 'undefined') {
+      user = localStorage.getItem("auth");
+    }
     let parsedUser: User | null = null;
     if (user) {
       try {
