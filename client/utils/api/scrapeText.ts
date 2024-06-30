@@ -2,9 +2,7 @@ import axios from 'axios';
 
 const host = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/extract`;
 interface User {
-  current: {
-    _id: string;
-  };
+  _id: string;
 }
 let user;
 if (typeof window !== 'undefined') {
