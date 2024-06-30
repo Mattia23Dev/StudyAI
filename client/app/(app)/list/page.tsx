@@ -35,18 +35,6 @@ interface Map {
     const [activeFolder, setActiveFolder] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [maps, setMaps] = useState([])
-    let user;
-    if (typeof window !== 'undefined') {
-      user = localStorage.getItem("auth");
-    }
-    let parsedUser: User | null = null;
-    if (user) {
-      try {
-        parsedUser = JSON.parse(user);
-      } catch (e) {
-        console.error('Error parsing user from localStorage:', e);
-      }
-    }
     
     const getMaps = async () => {
       try {
@@ -58,8 +46,20 @@ interface Map {
     }
 
     useEffect(() => {
+      let user;
+      if (typeof window !== 'undefined') {
+        user = localStorage.getItem("auth");
+      }
+      let parsedUser: User | null = null;
+      if (user) {
+        try {
+          parsedUser = JSON.parse(user);
+        } catch (e) {
+          console.error('Error parsing user from localStorage:', e);
+        }
+      }
       getMaps()
-    }, [parsedUser])
+    }, [])
     const handleOpenPopup = (open: string) => {
       if (open === "zero") {
         console.log(open);
