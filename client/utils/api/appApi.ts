@@ -19,7 +19,7 @@ if (user) {
 
 export const fetchUserMaps = async () => {
     try {
-      const response = await fetch(`${host}/${parsedUser?.current._id}/maps`);
+      const response = await fetch(`${host}/${parsedUser?._id}/maps`);
       const maps = await response.json();
       console.log(maps);
       return maps;

@@ -73,7 +73,7 @@ export const uploadImages = async ({ images }: UploadImagesProps) => {
 
 export const sendTextToApi = async ({ chapterTexts }: TextRequestProps) => {
   try {
-    const response = await axios.post(`${host}/analyze-text`, { chapterTexts, userId: parsedUser?.current._id });
+    const response = await axios.post(`${host}/analyze-text`, { chapterTexts, userId: parsedUser?._id });
     return response.data;
   } catch (error) {
     console.error('Error sending text to API:', error);
