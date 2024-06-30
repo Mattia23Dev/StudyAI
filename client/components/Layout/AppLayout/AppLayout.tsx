@@ -10,7 +10,7 @@ interface AppLayoutProps {
 
 export default function AppLayout({ children }: AppLayoutProps) {
 	const pathname = usePathname();
-	const showChapters = pathname.startsWith('/map/');
+	const showChapters = (pathname ?? '').startsWith('/map/');
 	return (
 		<CustomSessionProvider>
 			<div>
